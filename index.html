@@ -47,8 +47,11 @@ td.tn{text-align:left;white-space:nowrap}
 .ban{display:flex;justify-content:space-between;align-items:center;background:var(--c);color:#fff;padding:9px 12px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
 .F .ban{color:var(--bg)}.ban small{font-weight:400;opacity:.85;letter-spacing:.08em}
 .grp{border:1px solid var(--c);margin:14px 0;background:color-mix(in srgb,var(--c) 4%,transparent)}.gb{padding:4px 10px 8px}
+b.wl{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 6px;margin-left:8px;color:#fff;border-radius:2px}b.wl.w{background:#1f9d55}b.wl.l{background:#c9453a}
+@keyframes sr{from{opacity:.15;transform:translateX(-26px)}to{opacity:1;transform:none}}@keyframes sl{from{opacity:.15;transform:translateX(26px)}to{opacity:1;transform:none}}
+#app.sr{animation:sr .22s ease}#app.sl{animation:sl .22s ease}
 </style></head><body>
-<h1>BADMINTON LEAGUE<small>V7</small></h1><div class="w" id="app"></div>
+<h1>BADMINTON LEAGUE<small>V8</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
@@ -66,7 +69,7 @@ return r.sort((a,b)=>b.pts-a.pts||b.d-a.d||b.pf-a.pf)}
 const leagueDone=()=>LG().every((m,k)=>res('L'+k,1,2));
 function setSc(id,j,v){S.sc[id]=S.sc[id]||[null,null];S.sc[id][j]=v===''?null:+v;save();show(true)}
 function mc(id,a,b,label,st){const s=S.sc[id]||[],w=res(id,a,b);
-const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win'+(st!=='L'?' big':''):w!=null?'lose':''}"><i class="dot" style="background:${C[t%8]}"></i>${T(t)}${w===t&&st!=='L'?' 🏆':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
+const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win'+(st!=='L'?' big':''):w!=null?'lose':''}"><i class="dot" style="background:${C[t%8]}"></i>${T(t)}${w===t&&st!=='L'?' 🏆':''}${w===t?'<b class="wl w">W</b>':w!=null?'<b class="wl l">L</b>':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
 return `<div class="m ${st}"><div class="mu"><span class="tag">${{L:'League',Q:'QF',S:'Semi',F:'Final'}[st]}</span>${label}</div>${row(a,0)}${row(b,1)}</div>`}
 function show(keep){const y=scrollY;render();if(keep)scrollTo(0,y)}
 function render(){if(!CODE)return gate();R0();if(!ORG)view()}
@@ -76,9 +79,9 @@ document.getElementById('nav').innerHTML=[['teams','Teams'],['league','Matches']
 if(tab==='teams')return teams();
 if(!S.locked)return $('<div class="card box">Teams are not locked yet.</div>');
 if(tab==='league')return $('<h2 class="hs L">League stage<small>'+LG().filter((m,k)=>res('L'+k,m[0],m[1])).length+' / '+S.pros.length+' played</small></h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1),'L')).join(''));
-if(tab==='table'){const t=table(),by=BYES();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${T(x.i)}${n<by?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?'Top '+by+' skip the quarter-finals · ':''}Ties: point difference, then points scored</div><button class="b sh" onclick="shareImg()">Share as image</button><button class="b g sh" onclick="share()">Share link & code</button>`)}
+if(tab==='table'){const t=table(),by=BYES();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${T(x.i)}${n<by?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td style="color:#1f9d55">${x.w}</td><td style="color:#c9453a">${x.l}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?'Top '+by+' skip the quarter-finals · ':''}Ties: point difference, then points scored</div><button class="b sh" onclick="shareImg('table')">Share to WhatsApp</button>`)}
 play()}
-function PO(){const t=table().map(x=>x.i),n=t.length,sd=k=>k<=n?t[k-1]:null;let A,B,Q=[];
+function PO(){const t=table().map(x=>x.i),n=t.length,sd=k=>k<=n?t[k-1]:null;let A,B,Q=[];if(n<=3)return{Q:[],S:[],F:{id:'F',a:sd(1),b:sd(2),l:'Final'}};
 if(n===4){A=[sd(1),sd(4)];B=[sd(2),sd(3)]}else{const W=[];[[1,8],[4,5],[2,7],[3,6]].forEach(([x,y])=>{const a=sd(x),b=sd(y);if(b==null)W.push(a);else{const id='Q'+x+'v'+y;Q.push({id,a,b,l:'Seed '+x+' v '+y});W.push(res(id,a,b))}});A=[W[0],W[1]];B=[W[2],W[3]]}
 const S2=[{id:'S1',a:A[0],b:A[1],l:'Semi 1'},{id:'S2',a:B[0],b:B[1],l:'Semi 2'}];
 const f1=A[0]!=null&&A[1]!=null?res('S1',A[0],A[1]):null,f2=B[0]!=null&&B[1]!=null?res('S2',B[0],B[1]):null;
@@ -88,42 +91,55 @@ const p=PO();let m=S.pros.length,h='';
 const blk=(x,st)=>{const k=++m;return x.a!=null&&x.b!=null?mc(x.id,x.a,x.b,'Match '+k+' · '+x.l,st):'<div class="wait">Match '+k+' · '+x.l+' – waiting</div>'};
 const G=(st,t,b,c)=>'<div class="grp '+st+'"><div class="ban"><span>'+t+'</span><small>'+c+'</small></div><div class="gb">'+b+'</div></div>';
 if(p.Q.length)h+=G('Q','Quarter-finals',p.Q.map(x=>blk(x,'Q')).join(''),p.Q.length+' matches');
-h+=G('S','Semi-finals',p.S.map(x=>blk(x,'S')).join(''),'2 matches');h+=G('F','🏆 Final',blk(p.F,'F'),'1 match');
+if(p.S.length)h+=G('S','Semi-finals',p.S.map(x=>blk(x,'S')).join(''),'2 matches');h+=G('F','🏆 Final',blk(p.F,'F'),'1 match');
 const c=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;
 if(c!=null)h+=`<div class="champ">🏆<br>Champions<br><span style="font-size:20px">${T(c)}</span></div>`;
-h+='<button class="b g sh" onclick="shareImg()">Share as image</button>';$(h)}
-async function shareImg(){const n=S.pros.length,t=table(),by=BYES(),it=[{k:'s',tx:'Standings',c:'#111'}];
-t.forEach((x,i)=>it.push({k:'t',x,r:i+1,b:i<by}));
-const g=[['Matches · League','#2f6fdb',LG().map((m,k)=>({id:'L'+k,a:m[0],b:m[1]}))]];
-if(leagueDone()){const p=PO();g.push(['Quarter-finals','#d98a0b',p.Q],['Semi-finals','#8250d8',p.S],['Final','#111',[p.F]])}
-g.forEach(([nm,c,ms])=>{const d=ms.filter(m=>m.a!=null&&m.b!=null&&res(m.id,m.a,m.b));if(d.length){it.push({k:'s',tx:nm,c});d.forEach(m=>it.push({k:'m',m,c}))}});
-const hh={s:84,t:84,m:116},W=1080,P=56,F='"Helvetica Neue",Helvetica,Arial,sans-serif';let H=330;it.forEach(o=>H+=hh[o.k]);
-const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
-const tx=(s,a,y,w,px,col,al,max)=>{x.font=w+' '+px+'px '+F;x.fillStyle=col;x.textAlign=al||'left';x.fillText(s,a,y,max)};
-x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#000';x.fillRect(0,0,W,190);
-if('letterSpacing' in x)x.letterSpacing='8px';tx('BADMINTON LEAGUE',P,98,'700',44,'#fff');
-if('letterSpacing' in x)x.letterSpacing='4px';tx('LEAGUE CODE  '+CODE,P,148,'400',24,'#bbb');if('letterSpacing' in x)x.letterSpacing='0px';
+h+='<button class="b sh" onclick="shareImg(\'play\')">Share to WhatsApp</button>';$(h)}
+async function shareImg(mode){const t=table(),by=BYES(),dn=leagueDone(),p=dn?PO():null,play=mode==='play';if(play&&!p)return;
+const W=1080,P=56,F='"Helvetica Neue",Helvetica,Arial,sans-serif',it=[];const bar=(tx,c)=>it.push({k:'s',tx,c});
+if(play){const cm=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;if(cm!=null)it.push({k:'c',cm});
+if(p.Q.length){bar('Quarter-finals','#d98a0b');p.Q.forEach(m=>it.push({k:'m',m,c:'#d98a0b',po:1}))}
+if(p.S.length){bar('Semi-finals','#8250d8');p.S.forEach(m=>it.push({k:'m',m,c:'#8250d8',po:1}))}
+bar('Final','#111');it.push({k:'m',m:p.F,c:'#111',po:1})}
+else{bar('Standings','#111');t.forEach((r,i)=>it.push({k:'t',r:r,n:i+1,b:i<by}));bar('League matches','#2f6fdb');LG().forEach((m,k)=>it.push({k:'m',m:{id:'L'+k,a:m[0],b:m[1]},c:'#2f6fdb'}))}
+const hh={s:90,t:76,m:92,c:170};let H=300;it.forEach(o=>H+=hh[o.k]);
+const cv=document.createElement('canvas');cv.width=W;cv.height=H;const q=cv.getContext('2d');
+const T2=(s,a,y,w,px,col,al,mx)=>{q.font=w+' '+px+'px '+F;q.fillStyle=col;q.textAlign=al||'left';q.fillText(s,a,y,mx)};
+const ci=(xc,yc,fill,gl,gc)=>{q.fillStyle=fill;q.beginPath();q.arc(xc,yc,19,0,7);q.fill();T2(gl,xc,yc+10,'700',26,gc,'center')};
+q.fillStyle='#fff';q.fillRect(0,0,W,H);q.fillStyle='#000';q.fillRect(0,0,W,190);
+if('letterSpacing' in q)q.letterSpacing='8px';T2('BADMINTON LEAGUE',P,98,'700',44,'#fff');
+if('letterSpacing' in q)q.letterSpacing='4px';T2((play?'PLAYOFFS':'STANDINGS')+'  ·  CODE '+CODE,P,148,'400',24,'#bbb');if('letterSpacing' in q)q.letterSpacing='0px';
 let y=230;it.forEach(o=>{
-if(o.k==='s'){x.fillStyle=o.c;x.fillRect(P,y+28,18,18);tx(o.tx.toUpperCase(),P+36,y+46,'700',28,'#111');x.fillStyle='#e6e6e6';x.fillRect(P,y+66,W-2*P,2)}
-else if(o.k==='t'){if(o.b){x.fillStyle='#f2f2f2';x.fillRect(P,y,W-2*P,80)}
-tx(String(o.r),P+16,y+52,'700',32,'#111');x.fillStyle=C[o.x.i%8];x.beginPath();x.arc(P+90,y+40,12,0,7);x.fill();
-tx(T(o.x.i),P+120,y+51,'600',34,'#111','left',560);tx(o.x.w+'W '+o.x.l+'L',W-P-170,y+50,'400',26,'#777','right');tx(String(o.x.pts),W-P-16,y+52,'700',40,'#111','right')}
-else{const m=o.m,w=res(m.id,m.a,m.b);x.fillStyle=o.c;x.fillRect(P,y+6,8,100);
-[m.a,m.b].forEach((tm,j)=>{const yy=y+40+j*48;x.fillStyle=C[tm%8];x.beginPath();x.arc(P+40,yy-9,9,0,7);x.fill();tx((w===tm&&o.c!=='#2f6fdb'?'🏆 ':'')+T(tm),P+64,yy,w===tm?'700':'400',32,w===tm?'#111':'#888','left',700);tx(String((S.sc[m.id]||[])[j]),W-P-16,yy,'700',34,w===tm?'#111':'#888','right')})}
+if(o.k==='s'){q.fillStyle=o.c;q.fillRect(P,y+30,18,18);T2(o.tx.toUpperCase(),P+36,y+48,'700',28,'#111');q.fillStyle='#e6e6e6';q.fillRect(P,y+68,W-2*P,2)}
+else if(o.k==='c'){q.fillStyle='#000';q.fillRect(P,y+10,W-2*P,140);T2('🏆  CHAMPIONS',W/2,y+62,'700',26,'#fff','center');T2(T(o.cm),W/2,y+122,'700',46,'#fff','center',W-2*P-40)}
+else if(o.k==='t'){const r=o.r;if(o.b){q.fillStyle='#f2f2f2';q.fillRect(P,y,W-2*P,70)}
+T2(String(o.n),P+18,y+48,'700',32,'#111');q.fillStyle=C[r.i%8];q.beginPath();q.arc(P+90,y+36,12,0,7);q.fill();
+T2(T(r.i),P+118,y+47,'600',34,'#111','left',520);T2(r.w+'W',W-P-250,y+46,'700',28,'#1f9d55','right');T2(r.l+'L',W-P-170,y+46,'700',28,'#c9453a','right');T2(String(r.pts),W-P-16,y+48,'700',40,'#111','right')}
+else{const m=o.m,a=m.a,b=m.b,kn=a!=null&&b!=null,w=kn?res(m.id,a,b):null,sc=S.sc[m.id]||[];
+q.fillStyle=o.c;q.fillRect(P,y+8,8,76);
+const side=(tm,left)=>{const win=w!=null&&w===tm,los=w!=null&&!win,ix=left?P+52:W-P-26;
+if(win){o.po?T2('🏆',ix,y+60,'400',36,'#000','center'):ci(ix,y+48,'#1f9d55','✓','#fff')}else if(los)ci(ix,y+48,'#f3dedb','✕','#c9453a');
+T2(tm==null?'TBD':T(tm),left?P+90:W-P-72,y+58,win?'700':'400',30,los||tm==null?'#999':'#111',left?'left':'right',310)};
+side(a,true);side(b,false);
+(w!=null&&sc[0]!=null)?T2(sc[0]+' – '+sc[1],W/2,y+60,'700',40,'#111','center'):T2('vs',W/2,y+58,'400',28,'#999','center')}
 y+=hh[o.k]});
-tx('LIVE  '+location.href.split('#')[0].replace(/^https?:\/\//,''),P,H-70,'400',26,'#777');tx('Tap link · enter code '+CODE+' to watch',P,H-32,'400',24,'#999');
-cv.toBlob(async b=>{const f=new File([b],'badminton-league.png',{type:'image/png'});
-if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){}}
-else{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='badminton-league.png';a.click()}})}
+T2('LIVE  '+location.href.split('#')[0].replace(/^https?:\/\//,''),P,H-70,'400',26,'#777');T2('Open the link · enter code '+CODE,P,H-32,'400',24,'#999');
+cv.toBlob(async bl=>{const f=new File([bl],'badminton-league.png',{type:'image/png'});
+if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],text:'🏸 Badminton League\nLive: '+location.href.split('#')[0]+'\nCode: '+CODE})}catch(e){}}
+else{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download='badminton-league.png';a.click()}})}
+const TABS=['teams','league','table','play'];let tx0=0,ty0=0;
+function go(d){const i=TABS.indexOf(tab)+d;if(i<0||i>3)return;tab=TABS[i];render();const el=document.getElementById('app');el.classList.remove('sr','sl');void el.offsetWidth;el.classList.add(d>0?'sr':'sl');scrollTo(0,0)}
+document.addEventListener('touchstart',e=>{const t=e.touches[0];tx0=t.clientX;ty0=t.clientY},{passive:true});
+document.addEventListener('touchend',e=>{if(!CODE)return;const t=e.changedTouches[0],dx=t.clientX-tx0,dy=t.clientY-ty0;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6)return;const a=document.activeElement;if(a&&/INPUT|SELECT/.test(a.tagName))return;go(dx>0?1:-1)},{passive:true});
 function teams(){let h='';if(!ORG&&!S.locked)return $('<div class="card box">Teams not announced yet. This page updates live.</div>');
-if(S.locked){h+='<h2>Teams</h2>'+S.pros.map((_,i)=>`<div class="m" style="--c:${C[i%8]}"><div class="mu">Team ${i+1}</div><div class="t win">${T(i)}</div></div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">Edit teams</button>')+(cf?'<div class="card box"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
-h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Rows are just two lists (pros / partner pool). The real pairs are made only by the picks or the draw below. Add or remove rows (4 to 8 teams).</div><div class="card box">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" value="${p}" onchange="S.pros[${i}]=this.value.trim();save()"><input placeholder="Partner ${i+1}" value="${S.oth[i]}" onchange="S.oth[${i}]=this.value.trim();save()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
+if(S.locked){h+='<h2>Teams</h2>'+(ORG?'<div class="mu">Edit a name any time to substitute a player</div>':'')+S.pros.map((_,i)=>`<div class="m" style="--c:${C[i%8]}"><div class="mu">Team ${i+1}</div>${ORG?`<div class="r"><input value="${S.pros[i]}" onchange="S.pros[${i}]=this.value.trim();save()"><input value="${S.pick[i]}" onchange="S.pick[${i}]=this.value.trim();save()"></div>`:`<div class="t win">${T(i)}</div>`}</div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">Edit teams</button>')+(cf?'<div class="card box"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
+h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Rows are just two lists (pros / partner pool). The real pairs are made only by the picks or the draw below. Add or remove rows (3 to 8 teams, odd or even).</div><div class="card box">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" value="${p}" onchange="S.pros[${i}]=this.value.trim();save()"><input placeholder="Partner ${i+1}" value="${S.oth[i]}" onchange="S.oth[${i}]=this.value.trim();save()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
 h+='<h2>2. Partner picks</h2><div class="mu">Pros send their pick privately on WhatsApp – select it here, or press the lottery.</div><div class="card box">';
 S.pros.forEach((p,i)=>{const used=S.pick.filter((x,j)=>x&&j!==i);
 h+=`<div class="r" style="margin:4px 0"><div class="t">${p||'Pro '+(i+1)}</div><select onchange="S.pick[${i}]=this.value;save();render()"><option value="">– pick –</option>${S.oth.filter(o=>o&&!used.includes(o)).map(o=>`<option ${S.pick[i]===o?'selected':''}>${o}</option>`).join('')}</select></div>`});
 h+='</div><button class="b" onclick="lottery()">Lottery draw</button><button class="b" onclick="lock()">Lock teams & start</button>'+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':'');$(h)}
 function addRow(){if(S.pros.length>=8)return note('Maximum 8 pairs');S.pros.push('');S.oth.push('');S.pick.push('');save();render()}
-function delRow(i){if(S.pros.length<=4)return note('Minimum 4 pairs');S.pros.splice(i,1);S.oth.splice(i,1);S.pick.splice(i,1);S.pick=S.pick.map(x=>S.oth.includes(x)?x:'');save();render()}
+function delRow(i){if(S.pros.length<=3)return note('Minimum 3 pairs');S.pros.splice(i,1);S.oth.splice(i,1);S.pick.splice(i,1);S.pick=S.pick.map(x=>S.oth.includes(x)?x:'');save();render()}
 function lottery(){const o=S.oth.filter(Boolean);if(o.length<S.pros.length||S.pros.some(p=>!p))return note('Enter all names first.');
 let k=0;do{for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]]}}while(o.some((x,i)=>x===S.oth.filter(Boolean)[i])&&++k<200);S.pick=o;save();render()}
 function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fill every pro and partner pick.');S.locked=true;save();tab='league';render()}
