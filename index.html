@@ -1,23 +1,37 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Badminton League</title><link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Badminton%20League%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%7D">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <style>
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f7f5;--card:#fff;--tx:#14231b;--mu:#68786e;--ac:#0f9d58;--bd:#dde5e0;--gold:#e8a800}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1612;--card:#17221b;--tx:#e8f0ea;--mu:#8fa196;--ac:#2fc77a;--bd:#263329}}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{overflow-x:hidden;margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif;padding-bottom:70px}
-h1{font-size:19px;margin:0;padding:14px 14px 4px}h2{font-size:15px;margin:14px 0 6px}
-.w{padding:0 14px;max-width:560px;margin:auto}.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;margin:8px 0}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav button{flex:1;border:0;background:none;color:var(--mu);padding:12px 0;font-size:13px;font-weight:600}nav button.on{color:var(--ac)}
-button.b{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px;margin:4px 4px 4px 0}
-button.g{background:none;color:var(--mu);border:1px solid var(--bd)}
-input,select{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:9px;font-size:16px;width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none}select{background-image:none;text-overflow:ellipsis}
-.r{display:flex;gap:8px;align-items:center}.r>*{flex:1;min-width:0}.sc{font-size:16px!important;width:58px!important;flex:none;text-align:center;font-weight:700}
-.t{flex:1;font-weight:600;min-width:0;overflow-wrap:anywhere}.win{color:var(--ac)}.mu{color:var(--mu);font-size:12px}
-table{width:100%;border-collapse:collapse}td,th{padding:7px 4px;text-align:center;border-bottom:1px solid var(--bd)}td:nth-child(2),th:nth-child(2){text-align:left}th{font-size:12px;color:var(--mu)}
-.q td:first-child{color:var(--ac);font-weight:700}.champ{text-align:center;font-size:20px;color:var(--gold);font-weight:800;padding:10px}
-input,select,button{touch-action:manipulation}html,body{max-width:100%;overflow-x:hidden}</style></head><body>
-<h1>🏸 Badminton League <small style="font-size:11px;color:var(--mu);font-weight:400">v4</small></h1><div class="w" id="app"></div>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);--bg:#fff;--tx:#000;--mu:#767676;--bd:#e4e4e4}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#000;--tx:#fff;--mu:#9a9a9a;--bd:#2b2b2b}}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;max-width:100%;overflow-x:hidden}
+*{box-sizing:border-box;touch-action:manipulation}
+body{margin:0;background:var(--bg);color:var(--tx);font:13px/1.35 "Helvetica Neue",Helvetica,Arial,sans-serif;padding-bottom:calc(60px + env(safe-area-inset-bottom,0px));overflow-x:hidden}
+h1{font-size:13px;font-weight:700;letter-spacing:.28em;margin:0;padding:14px 16px 12px;border-bottom:1px solid var(--tx)}
+h1 small{font-size:9px;font-weight:400;color:var(--mu);letter-spacing:.1em;margin-left:8px}
+h2{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin:16px 0 4px}
+.w{padding:0 16px;max-width:560px;margin:auto}
+.card{border-top:1px solid var(--bd);padding:7px 0;margin:0}
+.card.box{border:1px solid var(--tx);padding:12px;margin:10px 0}
+.mu{color:var(--mu);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg);border-top:1px solid var(--tx);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;color:var(--mu);padding:15px 0 14px;font:600 10px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+nav button.on{color:var(--tx);box-shadow:inset 0 2px 0 var(--tx)}
+button.b{display:block;width:100%;background:var(--tx);color:var(--bg);border:1px solid var(--tx);border-radius:0;padding:13px 14px;font:600 11px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;margin:8px 0}
+button.g{background:transparent;color:var(--tx)}
+.r button.b{width:auto;flex:none;margin:0;padding:8px 12px}
+input,select{background:transparent;color:var(--tx);border:0;border-bottom:1px solid var(--tx);border-radius:0;padding:10px 0;font-size:16px;width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none}
+input::placeholder{color:var(--mu)}
+.r{display:flex;gap:10px;align-items:center}.r>*{flex:1;min-width:0}
+.sc{font-size:16px!important;width:48px!important;height:32px;flex:none;text-align:center;font-weight:700;border:1px solid var(--tx);padding:0}
+.m{padding:7px 0;border-top:1px solid var(--bd)}.m .r{margin:2px 0}
+.t{flex:1;font-weight:500;min-width:0;overflow-wrap:anywhere;font-size:14px}
+.win{font-weight:700}.lose{color:var(--mu);font-weight:400}
+table{width:100%;border-collapse:collapse}td,th{padding:9px 3px;text-align:center;border-bottom:1px solid var(--bd)}td:nth-child(2),th:nth-child(2){text-align:left}
+th{font-size:9px;font-weight:600;color:var(--mu);letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--tx)}
+.q td{font-weight:700}.q td:first-child:after{content:"*"}
+.champ{text-align:center;background:var(--tx);color:var(--bg);font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;padding:18px 10px;margin-top:10px;line-height:1.8}
+</style></head><body>
+<h1>BADMINTON LEAGUE<small>V5</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
@@ -35,19 +49,19 @@ return r.sort((a,b)=>b.pts-a.pts||b.d-a.d||b.pf-a.pf)}
 const leagueDone=()=>LG().every((m,k)=>res('L'+k,1,2));
 function setSc(id,j,v){S.sc[id]=S.sc[id]||[null,null];S.sc[id][j]=v===''?null:+v;save();show(true)}
 function mc(id,a,b,label){const s=S.sc[id]||[],w=res(id,a,b);
-const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win':''}">${T(t)}${w===t?' ✔':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
-return `<div class="card"><div class="mu">${label}</div>${row(a,0)}${row(b,1)}</div>`}
+const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win':w!=null?'lose':''}">${T(t)}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
+return `<div class="m"><div class="mu">${label}</div>${row(a,0)}${row(b,1)}</div>`}
 function show(keep){const y=scrollY;render();if(keep)scrollTo(0,y)}
 function render(){if(!CODE)return gate();R0();if(!ORG)view()}
 function view(){document.querySelectorAll('#app input,#app select,#app button.b').forEach(e=>{if(e.classList.contains('sh'))return;e.disabled=true;if(e.tagName=='BUTTON')e.style.display='none'})}
 function R0(){
-document.getElementById('nav').innerHTML=[['teams','👥 Teams'],['league','🏸 League'],['table','📊 Table'],['play','🏆 Playoffs']].map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('');
+document.getElementById('nav').innerHTML=[['teams','Teams'],['league','Matches'],['table','Table'],['play','Playoffs']].map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('');
 if(tab==='teams')return teams();
-if(!S.locked)return $('<div class="card">Teams are not locked yet.</div>');
-if(tab==='league')return $('<h2>League stage – '+S.pros.length+' matches (each team plays 2)</h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1))).join(''));
-if(tab==='table'){const t=table();return $(`<h2>Standings (Win = 2 pts)</h2><div class="card"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<2?'q':''}"><td>${n+1}</td><td>${T(x.i)}</td><td>${x.p}</td><td>${x.w}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table></div><div class="mu">Top 2 get a bye to the semis. Ties broken by point difference, then points scored.</div><button class="b sh" onclick="share()">Share on WhatsApp</button>`)}
+if(!S.locked)return $('<div class="card box">Teams are not locked yet.</div>');
+if(tab==='league')return $('<h2>League stage · '+S.pros.length+' matches</h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1))).join(''));
+if(tab==='table'){const t=table();return $(`<h2>Standings · win = 2 pts</h2><div><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<2?'q':''}"><td>${n+1}</td><td>${T(x.i)}</td><td>${x.p}</td><td>${x.w}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table></div><div class="mu">* Top 2 go straight to the semi-finals. Ties broken by point difference, then points scored.</div><button class="b sh" onclick="share()">Share on WhatsApp</button>`)}
 play()}
-function play(){if(!leagueDone())return $('<div class="card">Playoffs unlock when all league matches have scores (no ties).</div>');
+function play(){if(!leagueDone())return $('<div class="card box">Playoffs unlock when all league matches have scores (no ties).</div>');
 const t=table().map(x=>x.i),n=t.length;let m=n,h='';const sd=k=>k<=n?t[k-1]:null;let A,B;
 if(n===4){A=[sd(1),sd(4)];B=[sd(2),sd(3)]}
 else{h+='<h2>Quarter-finals</h2>';const W=[];
@@ -58,15 +72,15 @@ const sf=(id,p,l)=>{const k=++m;return p[0]!=null&&p[1]!=null?mc(id,p[0],p[1],'M
 h+=sf('S1',A,'Semi 1')+sf('S2',B,'Semi 2');
 const f1=A[0]!=null&&A[1]!=null?res('S1',A[0],A[1]):null,f2=B[0]!=null&&B[1]!=null?res('S2',B[0],B[1]):null;
 h+='<h2>Final</h2>';
-if(f1!=null&&f2!=null){h+=mc('F',f1,f2,'Match '+(++m)+' · Final');const c=res('F',f1,f2);if(c!=null)h+=`<div class="champ">🏆 Champions<br>${T(c)}</div>`}else h+='<div class="card mu">Waiting for semi-finals</div>';
+if(f1!=null&&f2!=null){h+=mc('F',f1,f2,'Match '+(++m)+' · Final');const c=res('F',f1,f2);if(c!=null)h+=`<div class="champ">Champions<br>${T(c)}</div>`}else h+='<div class="card mu">Waiting for semi-finals</div>';
 $(h)}
-function teams(){let h='';if(!ORG&&!S.locked)return $('<div class="card">Teams not announced yet. This page updates live.</div>');
-if(S.locked){h+='<h2>Teams</h2>'+S.pros.map((_,i)=>`<div class="card"><b>Team ${i+1}</b><br>${T(i)}</div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">✏️ Edit teams</button>')+(cf?'<div class="card"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
-h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Rows are just two lists (pros / partner pool). The real pairs are made only by the picks or the draw below. Add or remove rows (4 to 8 teams).</div><div class="card">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" value="${p}" onchange="S.pros[${i}]=this.value.trim();save()"><input placeholder="Partner ${i+1}" value="${S.oth[i]}" onchange="S.oth[${i}]=this.value.trim();save()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
-h+='<h2>2. Partner picks</h2><div class="mu">Pros send their pick privately on WhatsApp – select it here, or press the lottery.</div><div class="card">';
+function teams(){let h='';if(!ORG&&!S.locked)return $('<div class="card box">Teams not announced yet. This page updates live.</div>');
+if(S.locked){h+='<h2>Teams</h2>'+S.pros.map((_,i)=>`<div class="card box"><b>Team ${i+1}</b><br>${T(i)}</div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">Edit teams</button>')+(cf?'<div class="card box"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
+h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Rows are just two lists (pros / partner pool). The real pairs are made only by the picks or the draw below. Add or remove rows (4 to 8 teams).</div><div class="card box">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" value="${p}" onchange="S.pros[${i}]=this.value.trim();save()"><input placeholder="Partner ${i+1}" value="${S.oth[i]}" onchange="S.oth[${i}]=this.value.trim();save()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
+h+='<h2>2. Partner picks</h2><div class="mu">Pros send their pick privately on WhatsApp – select it here, or press the lottery.</div><div class="card box">';
 S.pros.forEach((p,i)=>{const used=S.pick.filter((x,j)=>x&&j!==i);
 h+=`<div class="r" style="margin:4px 0"><div class="t">${p||'Pro '+(i+1)}</div><select onchange="S.pick[${i}]=this.value;save();render()"><option value="">– pick –</option>${S.oth.filter(o=>o&&!used.includes(o)).map(o=>`<option ${S.pick[i]===o?'selected':''}>${o}</option>`).join('')}</select></div>`});
-h+='</div><button class="b" onclick="lottery()">🎲 Lottery draw (random)</button><button class="b" onclick="lock()">🔒 Lock teams & start</button>'+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':'');$(h)}
+h+='</div><button class="b" onclick="lottery()">Lottery draw</button><button class="b" onclick="lock()">Lock teams & start</button>'+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':'');$(h)}
 function addRow(){if(S.pros.length>=8)return note('Maximum 8 pairs');S.pros.push('');S.oth.push('');S.pick.push('');save();render()}
 function delRow(i){if(S.pros.length<=4)return note('Minimum 4 pairs');S.pros.splice(i,1);S.oth.splice(i,1);S.pick.splice(i,1);S.pick=S.pick.map(x=>S.oth.includes(x)?x:'');save();render()}
 function lottery(){const o=S.oth.filter(Boolean);if(o.length<S.pros.length||S.pros.some(p=>!p))return note('Enter all names first.');
@@ -75,7 +89,7 @@ function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fi
 function share(){const t=table();const m='🏸 League Table\n'+t.map((x,n)=>`${n+1}. ${T(x.i)} – ${x.pts} pts (${x.d>0?'+':''}${x.d})`).join('\n')+'\n\nLive: '+location.href.split('#')[0]+'\nCode: '+CODE;open('https://wa.me/?text='+encodeURIComponent(m))}
 render();
 function gate(){document.getElementById('nav').innerHTML='';let q={};try{q=JSON.parse(localStorage.getItem('bl_sess'))||{}}catch(e){}
-$(`<h2>Open a league</h2><div class="card"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${q.c||''}" style="margin:3px 0"><input id="gp" type="password" placeholder="Organizer PIN (organizers only)" value="${q.p||''}" style="margin:3px 0"></div><button class="b" onclick="enter(0)">👀 Watch live (players)</button><button class="b g" onclick="enter(1)">🔑 Organizer: create / open</button>`+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':''))}
+$(`<h2>Open a league</h2><div class="card box"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${q.c||''}" style="margin:3px 0"><input id="gp" type="password" placeholder="Organizer PIN (organizers only)" value="${q.p||''}" style="margin:3px 0"></div><button class="b" onclick="enter(0)">Watch live</button><button class="b g" onclick="enter(1)">Organizer login</button>`+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':''))}
 async function enter(org){const g=i=>document.getElementById(i).value.trim();const c=g('gc').toUpperCase().replace(/[^A-Z0-9]/g,''),p=g('gp');
 if(c.length<4)return note('Code needs 4+ letters/numbers');if(!window.FB)return note('Still connecting - try again in a moment');
 try{const d=await FB.get(c);
