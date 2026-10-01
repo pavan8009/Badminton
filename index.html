@@ -43,8 +43,12 @@ th{font-size:9px;font-weight:600;color:var(--mu);letter-spacing:.14em;text-trans
 .pill{font-size:8px;letter-spacing:.1em;border:1px solid var(--tx);padding:0 4px;margin-left:6px;font-weight:600}
 .q td{background:color-mix(in srgb,var(--tx) 6%,transparent)}.q td:first-child:after{content:""}
 td.tn{text-align:left;white-space:nowrap}
+.t.big{font-size:17px}
+.ban{display:flex;justify-content:space-between;align-items:center;background:var(--c);color:#fff;padding:9px 12px;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.F .ban{color:var(--bg)}.ban small{font-weight:400;opacity:.85;letter-spacing:.08em}
+.grp{border:1px solid var(--c);margin:14px 0;background:color-mix(in srgb,var(--c) 4%,transparent)}.gb{padding:4px 10px 8px}
 </style></head><body>
-<h1>BADMINTON LEAGUE<small>V6</small></h1><div class="w" id="app"></div>
+<h1>BADMINTON LEAGUE<small>V7</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
@@ -62,7 +66,7 @@ return r.sort((a,b)=>b.pts-a.pts||b.d-a.d||b.pf-a.pf)}
 const leagueDone=()=>LG().every((m,k)=>res('L'+k,1,2));
 function setSc(id,j,v){S.sc[id]=S.sc[id]||[null,null];S.sc[id][j]=v===''?null:+v;save();show(true)}
 function mc(id,a,b,label,st){const s=S.sc[id]||[],w=res(id,a,b);
-const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win':w!=null?'lose':''}"><i class="dot" style="background:${C[t%8]}"></i>${T(t)}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
+const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win'+(st!=='L'?' big':''):w!=null?'lose':''}"><i class="dot" style="background:${C[t%8]}"></i>${T(t)}${w===t&&st!=='L'?' 🏆':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
 return `<div class="m ${st}"><div class="mu"><span class="tag">${{L:'League',Q:'QF',S:'Semi',F:'Final'}[st]}</span>${label}</div>${row(a,0)}${row(b,1)}</div>`}
 function show(keep){const y=scrollY;render();if(keep)scrollTo(0,y)}
 function render(){if(!CODE)return gate();R0();if(!ORG)view()}
@@ -72,7 +76,7 @@ document.getElementById('nav').innerHTML=[['teams','Teams'],['league','Matches']
 if(tab==='teams')return teams();
 if(!S.locked)return $('<div class="card box">Teams are not locked yet.</div>');
 if(tab==='league')return $('<h2 class="hs L">League stage<small>'+LG().filter((m,k)=>res('L'+k,m[0],m[1])).length+' / '+S.pros.length+' played</small></h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1),'L')).join(''));
-if(tab==='table'){const t=table(),by=BYES();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${T(x.i)}${n<by?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?'Top '+by+' skip the quarter-finals · ':''}Ties: point difference, then points scored</div><button class="b sh" onclick="shareImg()">Share as image</button><button class="b g sh" onclick="share()">Share as text</button>`)}
+if(tab==='table'){const t=table(),by=BYES();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${T(x.i)}${n<by?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td>${x.w}</td><td>${x.l}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?'Top '+by+' skip the quarter-finals · ':''}Ties: point difference, then points scored</div><button class="b sh" onclick="shareImg()">Share as image</button><button class="b g sh" onclick="share()">Share link & code</button>`)}
 play()}
 function PO(){const t=table().map(x=>x.i),n=t.length,sd=k=>k<=n?t[k-1]:null;let A,B,Q=[];
 if(n===4){A=[sd(1),sd(4)];B=[sd(2),sd(3)]}else{const W=[];[[1,8],[4,5],[2,7],[3,6]].forEach(([x,y])=>{const a=sd(x),b=sd(y);if(b==null)W.push(a);else{const id='Q'+x+'v'+y;Q.push({id,a,b,l:'Seed '+x+' v '+y});W.push(res(id,a,b))}});A=[W[0],W[1]];B=[W[2],W[3]]}
@@ -82,10 +86,11 @@ return{Q,S:S2,F:{id:'F',a:f1,b:f2,l:'Final'}}}
 function play(){if(!leagueDone())return $('<div class="card box">Playoffs unlock when all league matches have scores (no ties).</div>');
 const p=PO();let m=S.pros.length,h='';
 const blk=(x,st)=>{const k=++m;return x.a!=null&&x.b!=null?mc(x.id,x.a,x.b,'Match '+k+' · '+x.l,st):'<div class="wait">Match '+k+' · '+x.l+' – waiting</div>'};
-if(p.Q.length)h+='<h2 class="hs Q">Quarter-finals</h2>'+p.Q.map(x=>blk(x,'Q')).join('');
-h+='<h2 class="hs S">Semi-finals</h2>'+p.S.map(x=>blk(x,'S')).join('')+'<h2 class="hs F">Final</h2>'+blk(p.F,'F');
+const G=(st,t,b,c)=>'<div class="grp '+st+'"><div class="ban"><span>'+t+'</span><small>'+c+'</small></div><div class="gb">'+b+'</div></div>';
+if(p.Q.length)h+=G('Q','Quarter-finals',p.Q.map(x=>blk(x,'Q')).join(''),p.Q.length+' matches');
+h+=G('S','Semi-finals',p.S.map(x=>blk(x,'S')).join(''),'2 matches');h+=G('F','🏆 Final',blk(p.F,'F'),'1 match');
 const c=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;
-if(c!=null)h+=`<div class="champ">Champions<br>${T(c)}</div>`;
+if(c!=null)h+=`<div class="champ">🏆<br>Champions<br><span style="font-size:20px">${T(c)}</span></div>`;
 h+='<button class="b g sh" onclick="shareImg()">Share as image</button>';$(h)}
 async function shareImg(){const n=S.pros.length,t=table(),by=BYES(),it=[{k:'s',tx:'Standings',c:'#111'}];
 t.forEach((x,i)=>it.push({k:'t',x,r:i+1,b:i<by}));
@@ -104,11 +109,11 @@ else if(o.k==='t'){if(o.b){x.fillStyle='#f2f2f2';x.fillRect(P,y,W-2*P,80)}
 tx(String(o.r),P+16,y+52,'700',32,'#111');x.fillStyle=C[o.x.i%8];x.beginPath();x.arc(P+90,y+40,12,0,7);x.fill();
 tx(T(o.x.i),P+120,y+51,'600',34,'#111','left',560);tx(o.x.w+'W '+o.x.l+'L',W-P-170,y+50,'400',26,'#777','right');tx(String(o.x.pts),W-P-16,y+52,'700',40,'#111','right')}
 else{const m=o.m,w=res(m.id,m.a,m.b);x.fillStyle=o.c;x.fillRect(P,y+6,8,100);
-[m.a,m.b].forEach((tm,j)=>{const yy=y+40+j*48;x.fillStyle=C[tm%8];x.beginPath();x.arc(P+40,yy-9,9,0,7);x.fill();tx(T(tm),P+64,yy,w===tm?'700':'400',32,w===tm?'#111':'#888','left',700);tx(String((S.sc[m.id]||[])[j]),W-P-16,yy,'700',34,w===tm?'#111':'#888','right')})}
+[m.a,m.b].forEach((tm,j)=>{const yy=y+40+j*48;x.fillStyle=C[tm%8];x.beginPath();x.arc(P+40,yy-9,9,0,7);x.fill();tx((w===tm&&o.c!=='#2f6fdb'?'🏆 ':'')+T(tm),P+64,yy,w===tm?'700':'400',32,w===tm?'#111':'#888','left',700);tx(String((S.sc[m.id]||[])[j]),W-P-16,yy,'700',34,w===tm?'#111':'#888','right')})}
 y+=hh[o.k]});
 tx('LIVE  '+location.href.split('#')[0].replace(/^https?:\/\//,''),P,H-70,'400',26,'#777');tx('Tap link · enter code '+CODE+' to watch',P,H-32,'400',24,'#999');
 cv.toBlob(async b=>{const f=new File([b],'badminton-league.png',{type:'image/png'});
-if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],text:'🏸 Badminton League\n'+location.href.split('#')[0]+'\nCode: '+CODE})}catch(e){}}
+if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]})}catch(e){}}
 else{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='badminton-league.png';a.click()}})}
 function teams(){let h='';if(!ORG&&!S.locked)return $('<div class="card box">Teams not announced yet. This page updates live.</div>');
 if(S.locked){h+='<h2>Teams</h2>'+S.pros.map((_,i)=>`<div class="m" style="--c:${C[i%8]}"><div class="mu">Team ${i+1}</div><div class="t win">${T(i)}</div></div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">Edit teams</button>')+(cf?'<div class="card box"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
@@ -122,7 +127,7 @@ function delRow(i){if(S.pros.length<=4)return note('Minimum 4 pairs');S.pros.spl
 function lottery(){const o=S.oth.filter(Boolean);if(o.length<S.pros.length||S.pros.some(p=>!p))return note('Enter all names first.');
 let k=0;do{for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]]}}while(o.some((x,i)=>x===S.oth.filter(Boolean)[i])&&++k<200);S.pick=o;save();render()}
 function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fill every pro and partner pick.');S.locked=true;save();tab='league';render()}
-function share(){const t=table();const m='🏸 League Table\n'+t.map((x,n)=>`${n+1}. ${T(x.i)} – ${x.pts} pts (${x.d>0?'+':''}${x.d})`).join('\n')+'\n\nLive: '+location.href.split('#')[0]+'\nCode: '+CODE;open('https://wa.me/?text='+encodeURIComponent(m))}
+function share(){open('https://wa.me/?text='+encodeURIComponent('🏸 Badminton League – live scores\nOpen: '+location.href.split('#')[0]+'\nLeague code: '+CODE))}
 render();
 function gate(){document.getElementById('nav').innerHTML='';let q={};try{q=JSON.parse(localStorage.getItem('bl_sess'))||{}}catch(e){}
 $(`<h2>Open a league</h2><div class="card box"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${q.c||''}" style="margin:3px 0"><input id="gp" type="password" placeholder="Organizer PIN (organizers only)" value="${q.p||''}" style="margin:3px 0"></div><button class="b" onclick="enter(0)">Watch live</button><button class="b g" onclick="enter(1)">Organizer login</button>`+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':''))}
