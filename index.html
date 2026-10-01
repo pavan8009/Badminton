@@ -25,14 +25,14 @@ const blank=()=>({pros:['','','','','',''],oth:['','','','','',''],pick:['','','
 S=blank();let CODE='',PIN='',ORG=false;const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{pin:PIN,state:JSON.stringify(S)}).catch(()=>note('Could not save - check internet'))};
 const $=h=>document.getElementById('app').innerHTML=h;
 const T=i=>S.pick[i]?`${S.pros[i]||'Pro'} & ${S.pick[i]}`:'';
-const LG=[[0,1],[2,3],[4,5],[1,2],[3,4],[5,0]];
+const LG=()=>{const n=S.pros.length,a=[];for(const st of[0,1])for(let i=st;i<n;i+=2)a.push([i,(i+1)%n]);return a};
 function res(id,a,b){const s=S.sc[id];if(!s||s[0]==null||s[1]==null||s[0]===s[1])return null;return s[0]>s[1]?a:b}
-function table(){const r=[0,1,2,3,4,5].map(i=>({i,p:0,w:0,l:0,pf:0,pa:0}));
-LG.forEach((m,k)=>{const s=S.sc['L'+k];if(!s||s[0]==null||s[1]==null||s[0]===s[1])return;
+function table(){const r=S.pros.map((_,i)=>({i,p:0,w:0,l:0,pf:0,pa:0}));
+LG().forEach((m,k)=>{const s=S.sc['L'+k];if(!s||s[0]==null||s[1]==null||s[0]===s[1])return;
 [[0,1],[1,0]].forEach(([x,y])=>{const t=r[m[x]];t.p++;t.pf+=s[x];t.pa+=s[y];s[x]>s[y]?t.w++:t.l++})});
 r.forEach(t=>{t.pts=t.w*2;t.d=t.pf-t.pa});
 return r.sort((a,b)=>b.pts-a.pts||b.d-a.d||b.pf-a.pf)}
-const leagueDone=()=>LG.every((m,k)=>res('L'+k,1,2));
+const leagueDone=()=>LG().every((m,k)=>res('L'+k,1,2));
 function setSc(id,j,v){S.sc[id]=S.sc[id]||[null,null];S.sc[id][j]=v===''?null:+v;save();show(true)}
 function mc(id,a,b,label){const s=S.sc[id]||[],w=res(id,a,b);
 const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win':''}">${T(t)}${w===t?' ✔':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
@@ -44,30 +44,34 @@ function R0(){
 document.getElementById('nav').innerHTML=[['teams','👥 Teams'],['league','🏸 League'],['table','📊 Table'],['play','🏆 Playoffs']].map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('');
 if(tab==='teams')return teams();
 if(!S.locked)return $('<div class="card">Teams are not locked yet.</div>');
-if(tab==='league')return $('<h2>League stage – 6 matches (each team plays 2)</h2>'+LG.map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1)+' of 11')).join(''));
+if(tab==='league')return $('<h2>League stage – '+S.pros.length+' matches (each team plays 2)</h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1))).join(''));
 if(tab==='table'){const t=table();return $(`<h2>Standings (Win = 2 pts)</h2><div class="card"><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<2?'q':''}"><td>${n+1}</td><td>${T(x.i)}</td><td>${x.p}</td><td>${x.w}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table></div><div class="mu">Top 2 get a bye to the semis. Ties broken by point difference, then points scored.</div><button class="b sh" onclick="share()">Share on WhatsApp</button>`)}
 play()}
-function play(){if(!leagueDone())return $('<div class="card">Playoffs unlock when all 6 league matches have scores (no ties).</div>');
-const t=table().map(x=>x.i);const q1=[t[2],t[5]],q2=[t[3],t[4]];
-const w1=res('Q1',...q1),w2=res('Q2',...q2);
-let h='<h2>Quarter-finals</h2>'+mc('Q1',...q1,'Match 7 · Seed 3 v 6 (QF1)')+mc('Q2',...q2,'Match 8 · Seed 4 v 5 (QF2)')+'<h2>Semi-finals</h2>';
-h+=w2!=null?mc('S1',t[0],w2,'Match 9 · Seed 1 v QF2 winner'):'<div class="card mu">Seed 1 v QF2 winner – waiting</div>';
-h+=w1!=null?mc('S2',t[1],w1,'Match 10 · Seed 2 v QF1 winner'):'<div class="card mu">Seed 2 v QF1 winner – waiting</div>';
-const s1=w2!=null?res('S1',t[0],w2):null,s2=w1!=null?res('S2',t[1],w1):null;
+function play(){if(!leagueDone())return $('<div class="card">Playoffs unlock when all league matches have scores (no ties).</div>');
+const t=table().map(x=>x.i),n=t.length;let m=n,h='';const sd=k=>k<=n?t[k-1]:null;let A,B;
+if(n===4){A=[sd(1),sd(4)];B=[sd(2),sd(3)]}
+else{h+='<h2>Quarter-finals</h2>';const W=[];
+[[1,8],[4,5],[2,7],[3,6]].forEach(([x,y])=>{const a=sd(x),b=sd(y);if(b==null)W.push(a);else{const id='Q'+x+'v'+y;h+=mc(id,a,b,'Match '+(++m)+' · Seed '+x+' v '+y);W.push(res(id,a,b))}});
+A=[W[0],W[1]];B=[W[2],W[3]]}
+h+='<h2>Semi-finals</h2>';
+const sf=(id,p,l)=>{const k=++m;return p[0]!=null&&p[1]!=null?mc(id,p[0],p[1],'Match '+k+' · '+l):'<div class="card mu">'+l+' – waiting</div>'};
+h+=sf('S1',A,'Semi 1')+sf('S2',B,'Semi 2');
+const f1=A[0]!=null&&A[1]!=null?res('S1',A[0],A[1]):null,f2=B[0]!=null&&B[1]!=null?res('S2',B[0],B[1]):null;
 h+='<h2>Final</h2>';
-if(s1!=null&&s2!=null){h+=mc('F',s1,s2,'Match 11 · Final');const c=res('F',s1,s2);if(c!=null)h+=`<div class="champ">🏆 Champions<br>${T(c)}</div>`}else h+='<div class="card mu">Waiting for semi-finals</div>';
+if(f1!=null&&f2!=null){h+=mc('F',f1,f2,'Match '+(++m)+' · Final');const c=res('F',f1,f2);if(c!=null)h+=`<div class="champ">🏆 Champions<br>${T(c)}</div>`}else h+='<div class="card mu">Waiting for semi-finals</div>';
 $(h)}
 function teams(){let h='';if(!ORG&&!S.locked)return $('<div class="card">Teams not announced yet. This page updates live.</div>');
-if(S.locked){h+='<h2>Teams</h2>'+[0,1,2,3,4,5].map(i=>`<div class="card"><b>Team ${i+1}</b><br>${T(i)}</div>`).join('')+(cf?'<div class="card"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
-h+='<h2>1. Six pro players</h2><div class="card">'+S.pros.map((p,i)=>`<input placeholder="Pro ${i+1} name" value="${p}" style="margin:3px 0" onchange="S.pros[${i}]=this.value.trim();save();render()">`).join('')+'</div>';
-h+='<h2>2. Six partner players (kept secret)</h2><div class="card">'+S.oth.map((p,i)=>`<input placeholder="Player ${i+1} name" value="${p}" style="margin:3px 0" onchange="S.oth[${i}]=this.value.trim();save();render()">`).join('')+'</div>';
-h+='<h2>3. Partner picks</h2><div class="mu">Pros send their pick privately on WhatsApp – select it here, or press the lottery.</div><div class="card">';
+if(S.locked){h+='<h2>Teams</h2>'+S.pros.map((_,i)=>`<div class="card"><b>Team ${i+1}</b><br>${T(i)}</div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">✏️ Edit teams</button>')+(cf?'<div class="card"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
+h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Each row: a pro + a player in the partner pool. Add or remove rows (4 to 8 teams).</div><div class="card">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" value="${p}" onchange="S.pros[${i}]=this.value.trim();save();render()"><input placeholder="Partner ${i+1}" value="${S.oth[i]}" onchange="S.oth[${i}]=this.value.trim();save();render()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
+h+='<h2>2. Partner picks</h2><div class="mu">Pros send their pick privately on WhatsApp – select it here, or press the lottery.</div><div class="card">';
 S.pros.forEach((p,i)=>{const used=S.pick.filter((x,j)=>x&&j!==i);
 h+=`<div class="r" style="margin:4px 0"><div class="t">${p||'Pro '+(i+1)}</div><select onchange="S.pick[${i}]=this.value;save();render()"><option value="">– pick –</option>${S.oth.filter(o=>o&&!used.includes(o)).map(o=>`<option ${S.pick[i]===o?'selected':''}>${o}</option>`).join('')}</select></div>`});
 h+='</div><button class="b" onclick="lottery()">🎲 Lottery draw (random)</button><button class="b" onclick="lock()">🔒 Lock teams & start</button>'+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':'');$(h)}
-function lottery(){const o=S.oth.filter(Boolean);if(o.length<6||S.pros.some(p=>!p))return note('Enter all 12 names first.');
+function addRow(){if(S.pros.length>=8)return note('Maximum 8 pairs');S.pros.push('');S.oth.push('');S.pick.push('');save();render()}
+function delRow(i){if(S.pros.length<=4)return note('Minimum 4 pairs');S.pros.splice(i,1);S.oth.splice(i,1);S.pick.splice(i,1);S.pick=S.pick.map(x=>S.oth.includes(x)?x:'');save();render()}
+function lottery(){const o=S.oth.filter(Boolean);if(o.length<S.pros.length||S.pros.some(p=>!p))return note('Enter all names first.');
 for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]]}S.pick=o;save();render()}
-function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fill all 6 pros and all 6 partner picks.');S.locked=true;save();tab='league';render()}
+function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fill every pro and partner pick.');S.locked=true;save();tab='league';render()}
 function share(){const t=table();const m='🏸 League Table\n'+t.map((x,n)=>`${n+1}. ${T(x.i)} – ${x.pts} pts (${x.d>0?'+':''}${x.d})`).join('\n')+'\n\nLive: '+location.href.split('#')[0]+'\nCode: '+CODE;open('https://wa.me/?text='+encodeURIComponent(m))}
 render();
 function gate(){document.getElementById('nav').innerHTML='';let q={};try{q=JSON.parse(localStorage.getItem('bl_sess'))||{}}catch(e){}
