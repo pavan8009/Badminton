@@ -52,7 +52,7 @@ b.wl{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 6px;margin-l
 #app.sr{animation:sr .22s ease}#app.sl{animation:sl .22s ease}
 body{touch-action:pan-y}
 </style></head><body>
-<h1>BADMINTON LEAGUE<small>V11</small></h1><div class="w" id="app"></div>
+<h1>BADMINTON LEAGUE<small>V12</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
@@ -83,7 +83,7 @@ function R0(){
 document.getElementById('nav').innerHTML=[['teams','Teams'],['league','Matches'],['table','Table'],['play','Playoffs']].map(([k,l])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('');
 if(tab==='teams')return teams();
 if(!S.locked)return $('<div class="card box">Teams are not locked yet.</div>');
-if(tab==='league')return $('<h2 class="hs L">League stage<small>'+LG().filter((m,k)=>res('L'+k,m[0],m[1])).length+' / '+S.pros.length+' played</small></h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1),'L')).join('')+'<button class="b sh" onclick="shareImg(\'league\')">Share to WhatsApp</button>');
+if(tab==='league')return $('<h2 class="hs L">League stage<small>'+LG().filter((m,k)=>res('L'+k,m[0],m[1])!=null).length+' / '+S.pros.length+' played</small></h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1),'L')).join('')+'<button class="b sh" onclick="shareImg(\'league\')">Share to WhatsApp</button>');
 if(tab==='table'){const t=table(),by=BYES(),dn=leagueDone();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Diff</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by&&dn?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${TH(x.i)}${n<by&&dn?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td style="color:#1f9d55">${x.w}</td><td style="color:#c9453a">${x.l}</td><td style="font-weight:600;color:${x.d>0?'#1f9d55':x.d<0?'#c9453a':'var(--mu)'}">${x.d>0?'+'+x.d:x.d<0?'−'+(-x.d):'0'}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?(dn?'Top '+by+' skip the quarter-finals':'Top '+by+' will skip the quarter-finals once the league ends'):''}<br>DIFF = points scored minus points conceded. Ties: DIFF, then points scored</div><button class="b sh" onclick="shareImg('table')">Share to WhatsApp</button>`)}
 play()}
 function PO(){const t=table().map(x=>x.i),n=t.length,sd=k=>k<=n?t[k-1]:null;let A,B,Q=[];if(n<=3)return{Q:[],S:[],F:{id:'F',a:sd(1),b:sd(2),l:'Final'}};
@@ -95,7 +95,7 @@ function play(){if(!leagueDone())return $('<div class="card box">Playoffs unlock
 const p=PO();let m=S.pros.length,h='';
 const blk=(x,st)=>{const k=++m;return x.a!=null&&x.b!=null?mc(x.id,x.a,x.b,'Match '+k+' · '+x.l,st):'<div class="wait">Match '+k+' · '+x.l+' – waiting</div>'};
 const G=(st,t,b,c)=>'<div class="grp '+st+'"><div class="ban"><span>'+t+'</span><small>'+c+'</small></div><div class="gb">'+b+'</div></div>';
-if(p.Q.length)h+=G('Q','Quarter-finals',p.Q.map(x=>blk(x,'Q')).join(''),p.Q.length+' matches');
+if(p.Q.length)h+=G('Q','Quarter-finals',p.Q.map(x=>blk(x,'Q')).join(''),(p.Q.length===1?'1 match':p.Q.length+' matches'));
 if(p.S.length)h+=G('S','Semi-finals',p.S.map(x=>blk(x,'S')).join(''),'2 matches');h+=G('F','🏆 Final',blk(p.F,'F'),'1 match');
 const c=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;
 if(c!=null)h+=`<div class="champ">🏆<br>Champions<br><span style="font-size:20px">${TH(c)}</span></div>`;
