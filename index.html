@@ -51,8 +51,9 @@ b.wl{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 6px;margin-l
 @keyframes sr{from{opacity:.15;transform:translateX(-26px)}to{opacity:1;transform:none}}@keyframes sl{from{opacity:.15;transform:translateX(26px)}to{opacity:1;transform:none}}
 #app.sr{animation:sr .22s ease}#app.sl{animation:sl .22s ease}
 body{touch-action:pan-y}
+.seg{display:flex;margin:10px 0 2px}.seg button{flex:1;padding:10px;border:1px solid var(--tx);background:transparent;color:var(--tx);font:600 10px "Helvetica Neue",Helvetica,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase}.seg button.on{background:var(--tx);color:var(--bg)}
 </style></head><body>
-<h1>BADMINTON LEAGUE<small>V12</small></h1><div class="w" id="app"></div>
+<h1>BADMINTON LEAGUE<small>V13</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
@@ -61,7 +62,7 @@ const C=['#e4572e','#2e86ab','#3a9d5d','#8e5bd1','#d9a31b','#d6467f','#2a9d8f','
 const clean=o=>{o=o&&typeof o==='object'?o:{};const n=Math.min(8,Math.max(3,Array.isArray(o.pros)?o.pros.length:6)),a=k=>Array.from({length:n},(_,i)=>String((Array.isArray(o[k])?o[k][i]:'')??'').slice(0,30)),sc={};
 if(o.sc&&typeof o.sc==='object')for(const k in o.sc){const v=o.sc[k];if(/^(L\d{1,2}|Q\d{1}v\d{1}|S[12]|F)$/.test(k)&&Array.isArray(v)){const f=x=>x==null||isNaN(+x)?null:Math.max(0,Math.min(99,Math.round(+x)));sc[k]=[f(v[0]),f(v[1])]}}
 return{pros:a('pros'),oth:a('oth'),pick:a('pick'),locked:!!o.locked,sc}};
-let CODE='',OWNER='',ORG=false,GC='',GP='';const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{owner:OWNER,state:JSON.stringify(S)}).catch(e=>note(e.code==='permission-denied'?'Could not save: publish the Firestore rules (Rules tab)':'Could not save ('+(e.code||'error')+')'))};
+let CODE='',OWNER='',ORG=false,GC='',GP='',TV='';const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{owner:OWNER,state:JSON.stringify(S)}).catch(e=>note(e.code==='permission-denied'?'Could not save: publish the Firestore rules (Rules tab)':'Could not save ('+(e.code||'error')+')'))};
 const $=h=>document.getElementById('app').innerHTML=h;
 const T=i=>S.pick[i]?`${S.pros[i]||'Pro'} & ${S.pick[i]}`:'';const TH=i=>E(T(i));
 const LG=()=>{const n=S.pros.length,a=[];for(const st of[0,1])for(let i=st;i<n;i+=2)a.push([i,(i+1)%n]);return a};
@@ -84,8 +85,16 @@ document.getElementById('nav').innerHTML=[['teams','Teams'],['league','Matches']
 if(tab==='teams')return teams();
 if(!S.locked)return $('<div class="card box">Teams are not locked yet.</div>');
 if(tab==='league')return $('<h2 class="hs L">League stage<small>'+LG().filter((m,k)=>res('L'+k,m[0],m[1])!=null).length+' / '+S.pros.length+' played</small></h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1),'L')).join('')+'<button class="b sh" onclick="shareImg(\'league\')">Share to WhatsApp</button>');
-if(tab==='table'){const t=table(),by=BYES(),dn=leagueDone();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Diff</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by&&dn?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${TH(x.i)}${n<by&&dn?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td style="color:#1f9d55">${x.w}</td><td style="color:#c9453a">${x.l}</td><td style="font-weight:600;color:${x.d>0?'#1f9d55':x.d<0?'#c9453a':'var(--mu)'}">${x.d>0?'+'+x.d:x.d<0?'−'+(-x.d):'0'}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?(dn?'Top '+by+' skip the quarter-finals':'Top '+by+' will skip the quarter-finals once the league ends'):''}<br>DIFF = points scored minus points conceded. Ties: DIFF, then points scored</div><button class="b sh" onclick="shareImg('table')">Share to WhatsApp</button>`)}
+if(tab==='table'){const mode=tvMode(),all=mode==='all',t=all?overall():table(),by=BYES(),dn=leagueDone(),sg={4:'<b>🏆</b>',3:'<span class="pill" style="margin:0;background:var(--tx);color:var(--bg)">FINAL</span>',2:'<span class="pill" style="margin:0;color:var(--sf);border-color:var(--sf)">SEMI</span>',1:'<span class="pill" style="margin:0;color:var(--qf);border-color:var(--qf)">QF</span>',0:'<span class="mu">–</span>'};
+return $(`${anyPO()?`<div class="seg"><button class="${all?'':'on'}" onclick="TV='league';render()">League</button><button class="${all?'on':''}" onclick="TV='all';render()">Overall</button></div>`:''}<h2>${all?'Overall · all matches played':'League standings · win = 2 pts'}</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Diff</th><th>${all?'Stage':'Pts'}</th></tr>${t.map((x,n)=>`<tr class="${!all&&n<by&&dn?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${TH(x.i)}${!all&&n<by&&dn?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td style="color:#1f9d55">${x.w}</td><td style="color:#c9453a">${x.l}</td><td style="font-weight:600;color:${x.d>0?'#1f9d55':x.d<0?'#c9453a':'var(--mu)'}">${x.d>0?'+'+x.d:x.d<0?'−'+(-x.d):'0'}</td><td>${all?sg[x.st]:'<b>'+x.pts+'</b>'}</td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${all?'Overall = league + playoff matches. Order: stage reached, then wins, then DIFF.':(by?(dn?'Top '+by+' skip the quarter-finals':'Top '+by+' will skip the quarter-finals once the league ends')+'<br>':'')+'DIFF = points scored minus points conceded. Ties: DIFF, then points scored.'}</div><button class="b sh" onclick="shareImg('table')">Share to WhatsApp</button>`)}
 play()}
+const anyPO=()=>{if(!leagueDone())return false;const p=PO();return p.Q.concat(p.S,[p.F]).some(m=>m.a!=null&&m.b!=null&&res(m.id,m.a,m.b)!=null)};
+const tvMode=()=>TV||(anyPO()?'all':'league');
+function overall(){const lt=table(),rank={};lt.forEach((x,i)=>rank[x.i]=i);const r=lt.map(x=>({i:x.i,p:0,w:0,l:0,pf:0,pa:0,st:0})),by={};r.forEach(x=>by[x.i]=x);
+const add=(id,a,b,st)=>{if(a==null||b==null)return;by[a].st=Math.max(by[a].st,st);by[b].st=Math.max(by[b].st,st);const sc=S.sc[id];if(!sc||sc[0]==null||sc[1]==null||sc[0]===sc[1])return;[[a,0,1],[b,1,0]].forEach(([x,j,k])=>{const t=by[x];t.p++;t.pf+=sc[j];t.pa+=sc[k];sc[j]>sc[k]?t.w++:t.l++})};
+LG().forEach((m,k)=>add('L'+k,m[0],m[1],0));
+if(leagueDone()){const p=PO();p.Q.forEach(m=>add(m.id,m.a,m.b,1));p.S.forEach(m=>add(m.id,m.a,m.b,2));add('F',p.F.a,p.F.b,3);const c=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;if(c!=null)by[c].st=4}
+r.forEach(x=>x.d=x.pf-x.pa);return r.sort((a,b)=>b.st-a.st||b.w-a.w||b.d-a.d||rank[a.i]-rank[b.i])}
 function PO(){const t=table().map(x=>x.i),n=t.length,sd=k=>k<=n?t[k-1]:null;let A,B,Q=[];if(n<=3)return{Q:[],S:[],F:{id:'F',a:sd(1),b:sd(2),l:'Final'}};
 if(n===4){A=[sd(1),sd(4)];B=[sd(2),sd(3)]}else{const W=[];[[1,8],[4,5],[2,7],[3,6]].forEach(([x,y])=>{const a=sd(x),b=sd(y);if(b==null)W.push(a);else{const id='Q'+x+'v'+y;Q.push({id,a,b,l:'Seed '+x+' v '+y});W.push(res(id,a,b))}});A=[W[0],W[1]];B=[W[2],W[3]]}
 const S2=[{id:'S1',a:A[0],b:A[1],l:'Semi 1'},{id:'S2',a:B[0],b:B[1],l:'Semi 2'}];
@@ -107,7 +116,7 @@ if(p.Q.length){bar('Quarter-finals','#d98a0b');p.Q.forEach(m=>it.push({k:'m',m,c
 if(p.S.length){bar('Semi-finals','#8250d8');p.S.forEach(m=>it.push({k:'m',m,c:'#8250d8',po:1}))}
 bar('Final','#111');it.push({k:'m',m:p.F,c:'#111',po:1})}
 else if(mode==='league'){bar('League matches','#2f6fdb');LG().forEach((m,k)=>it.push({k:'m',m:{id:'L'+k,a:m[0],b:m[1]},c:'#2f6fdb'}))}
-else{bar('Standings','#111');t.forEach((r,i)=>it.push({k:'t',r:r,n:i+1,b:dn&&i<by}))}
+else{const all=tvMode()==='all',rr=all?overall():t;if(all&&p){const c=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;if(c!=null)it.push({k:'c',cm:c})}bar(all?'Overall · all matches':'League standings','#111');rr.forEach((r,i)=>it.push({k:'t',r:r,n:i+1,b:!all&&dn&&i<by,all}))}
 const hh={s:100,t:96,m:156,c:200};let H=250;it.forEach(o=>H+=hh[o.k]);H+=210;
 const cv=document.createElement('canvas');cv.width=W;cv.height=H;const q=cv.getContext('2d');
 const T2=(s,a,y,w,px,col,al,mx)=>{q.font=w+' '+px+'px '+F;q.fillStyle=col;q.textAlign=al||'left';q.fillText(s,a,y,mx)};
@@ -120,7 +129,7 @@ if(o.k==='s'){q.fillStyle=o.c;q.fillRect(P,y+30,22,22);T2(o.tx.toUpperCase(),P+4
 else if(o.k==='c'){q.fillStyle='#000';q.fillRect(P,y+10,W-2*P,170);T2('🏆  CHAMPIONS',W/2,y+70,'700',30,'#fff','center');T2(T(o.cm),W/2,y+142,'700',58,'#fff','center',W-2*P-40)}
 else if(o.k==='t'){const r=o.r;if(o.b){q.fillStyle='#efefef';q.fillRect(P,y,W-2*P,88)}
 T2(String(o.n),P+22,y+60,'700',42,'#111','center');q.fillStyle=C[r.i%8];q.beginPath();q.arc(P+92,y+44,15,0,7);q.fill();
-T2(T(r.i),P+124,y+58,'700',42,'#111','left',420);T2(r.w+'W',W-P-410,y+56,'700',34,'#1f9d55','right');T2(r.l+'L',W-P-320,y+56,'700',34,'#c9453a','right');T2(r.d>0?'+'+r.d:r.d<0?'−'+(-r.d):'0',W-P-130,y+56,'700',34,r.d>0?'#1f9d55':r.d<0?'#c9453a':'#888','right');T2(String(r.pts),W-P-16,y+60,'700',56,'#111','right')}
+T2(T(r.i),P+124,y+58,'700',42,'#111','left',420);T2(r.w+'W',W-P-410,y+56,'700',34,'#1f9d55','right');T2(r.l+'L',W-P-320,y+56,'700',34,'#c9453a','right');T2(r.d>0?'+'+r.d:r.d<0?'−'+(-r.d):'0',W-P-130,y+56,'700',34,r.d>0?'#1f9d55':r.d<0?'#c9453a':'#888','right');o.all?T2(['–','QF','SEMI','FINAL','🏆'][r.st],W-P-16,y+58,'700',r.st===4?44:30,['#999','#d98a0b','#8250d8','#111','#000'][r.st],'right'):T2(String(r.pts),W-P-16,y+60,'700',56,'#111','right')}
 else{const m=o.m,a=m.a,b=m.b,kn=a!=null&&b!=null,w=kn?res(m.id,a,b):null,sc=S.sc[m.id]||[];
 q.globalAlpha=.07;q.fillStyle=o.c;q.fillRect(P,y+8,W-2*P,142);q.globalAlpha=1;q.fillStyle=o.c;q.fillRect(P,y+8,10,142);
 [[a,0],[b,1]].forEach(([tm,j])=>{const yb=y+62+j*64,win=w!=null&&w===tm,los=w!=null&&!win;
