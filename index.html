@@ -52,7 +52,7 @@ b.wl{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 6px;margin-l
 #app.sr{animation:sr .22s ease}#app.sl{animation:sl .22s ease}
 body{touch-action:pan-y}
 </style></head><body>
-<h1>BADMINTON LEAGUE<small>V10</small></h1><div class="w" id="app"></div>
+<h1>BADMINTON LEAGUE<small>V11</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
@@ -61,7 +61,7 @@ const C=['#e4572e','#2e86ab','#3a9d5d','#8e5bd1','#d9a31b','#d6467f','#2a9d8f','
 const clean=o=>{o=o&&typeof o==='object'?o:{};const n=Math.min(8,Math.max(3,Array.isArray(o.pros)?o.pros.length:6)),a=k=>Array.from({length:n},(_,i)=>String((Array.isArray(o[k])?o[k][i]:'')??'').slice(0,30)),sc={};
 if(o.sc&&typeof o.sc==='object')for(const k in o.sc){const v=o.sc[k];if(/^(L\d{1,2}|Q\d{1}v\d{1}|S[12]|F)$/.test(k)&&Array.isArray(v)){const f=x=>x==null||isNaN(+x)?null:Math.max(0,Math.min(99,Math.round(+x)));sc[k]=[f(v[0]),f(v[1])]}}
 return{pros:a('pros'),oth:a('oth'),pick:a('pick'),locked:!!o.locked,sc}};
-let CODE='',OWNER='',ORG=false;const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{owner:OWNER,state:JSON.stringify(S)}).catch(()=>note('Could not save - check internet'))};
+let CODE='',OWNER='',ORG=false,GC='',GP='';const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{owner:OWNER,state:JSON.stringify(S)}).catch(e=>note(e.code==='permission-denied'?'Could not save: publish the Firestore rules (Rules tab)':'Could not save ('+(e.code||'error')+')'))};
 const $=h=>document.getElementById('app').innerHTML=h;
 const T=i=>S.pick[i]?`${S.pros[i]||'Pro'} & ${S.pick[i]}`:'';const TH=i=>E(T(i));
 const LG=()=>{const n=S.pros.length,a=[];for(const st of[0,1])for(let i=st;i<n;i+=2)a.push([i,(i+1)%n]);return a};
@@ -153,9 +153,9 @@ let k=0;do{for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1))
 function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fill every pro and partner pick.');S.locked=true;save();tab='league';render()}
 function share(){open('https://wa.me/?text='+encodeURIComponent('🏸 Badminton League – live scores\nOpen: '+location.href.split('#')[0]+'\nLeague code: '+CODE))}
 render();
-function gate(){document.getElementById('nav').innerHTML='';let q={};try{q=JSON.parse(localStorage.getItem('bl_sess'))||{}}catch(e){}
-$(`<h2>Open a league</h2><div class="card box"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${E(q.c||'')}" style="margin:3px 0"><input id="gp" type="password" placeholder="Organizer PIN (4+ characters)" style="margin:3px 0"></div><button class="b" onclick="enter(0)">Watch live</button><button class="b g" onclick="enter(1)">Organizer login</button>`+(msg?'<div class="card" style="color:#d93025">'+E(msg)+'</div>':''))}
-async function enter(org){const g=i=>document.getElementById(i).value.trim();const c=g('gc').toUpperCase().replace(/[^A-Z0-9]/g,''),p=g('gp');
+function gate(){document.getElementById('nav').innerHTML='';if(!GC){try{GC=(JSON.parse(localStorage.getItem('bl_sess'))||{}).c||''}catch(e){}}
+$(`<h2>Open a league</h2><div class="card box"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${E(GC)}" autocapitalize="characters" autocomplete="off" style="margin:3px 0"><input id="gp" type="password" value="${E(GP)}" placeholder="Organizer PIN (4+ characters)" style="margin:3px 0"></div><button class="b" onclick="enter(0)">Watch live</button><button class="b g" onclick="enter(1)">Organizer login</button>`+(msg?'<div class="card" style="color:#d93025">'+E(msg)+'</div>':''))}
+async function enter(org){const g=i=>document.getElementById(i).value.trim();const c=g('gc').toUpperCase().replace(/[^A-Z0-9]/g,''),p=g('gp');GC=c;GP=p;
 if(c.length<4)return note('Code needs 4+ letters/numbers');if(!window.FB)return note('Still connecting - try again in a moment');
 try{const d=await FB.get(c);
 if(org){if(p.length<4)return note('Choose a PIN of 4+ characters');if(d&&!d.owner)return note('This older league has no owner. Use a new league code.');
@@ -163,7 +163,7 @@ const u=await FB.login(c,p);if(d&&d.owner!==u.uid)return note('Wrong PIN for thi
 OWNER=u.uid;ORG=true;CODE=c;S=d?clean(JSON.parse(d.state)):blank();if(!d)save()}
 else{if(!d)return note('League not found - check the code');CODE=c;ORG=false;S=clean(JSON.parse(d.state));FB.listen(c,x=>{try{if(x){S=clean(JSON.parse(x.state));const y=scrollY;render();scrollTo(0,y)}}catch(e){}})}
 msg='';try{localStorage.setItem('bl_sess',JSON.stringify({c}))}catch(e){}tab=ORG?'teams':'table';render()}
-catch(e){note(e.code==='auth/operation-not-allowed'?'Turn on Email/Password sign-in in Firebase (Authentication) first':(e.message||'').startsWith('Wrong PIN')?e.message:'Connection problem - please try again')}}
+catch(e){const k=e.code||'';note(k==='auth/operation-not-allowed'||k==='auth/configuration-not-found'?'Sign-in is switched off: Firebase > Authentication > Get started > Sign-in method > Email/Password > Enable':k==='permission-denied'?'Database rules block this: publish the Firestore rules':(e.message||'').startsWith('Wrong PIN')?e.message:'Connection problem ('+(k||e.message)+')')}}
 </script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
