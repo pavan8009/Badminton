@@ -52,14 +52,18 @@ b.wl{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 6px;margin-l
 #app.sr{animation:sr .22s ease}#app.sl{animation:sl .22s ease}
 body{touch-action:pan-y}
 </style></head><body>
-<h1>BADMINTON LEAGUE<small>V9</small></h1><div class="w" id="app"></div>
+<h1>BADMINTON LEAGUE<small>V10</small></h1><div class="w" id="app"></div>
 <nav id="nav"></nav>
 <script>
 const K='bl_v1';let S,tab='teams',msg='',cf=false;function note(t){msg=t;render();scrollTo(0,document.body.scrollHeight)}
 const blank=()=>({pros:['','','','','',''],oth:['','','','','',''],pick:['','','','','',''],locked:false,sc:{}});
-const C=['#e4572e','#2e86ab','#3a9d5d','#8e5bd1','#d9a31b','#d6467f','#2a9d8f','#7a6c5d'],BYES=()=>{const n=S.pros.length;return n>=5?8-n:0};S=blank();let CODE='',PIN='',ORG=false;const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{pin:PIN,state:JSON.stringify(S)}).catch(()=>note('Could not save - check internet'))};
+const C=['#e4572e','#2e86ab','#3a9d5d','#8e5bd1','#d9a31b','#d6467f','#2a9d8f','#7a6c5d'],BYES=()=>{const n=S.pros.length;return n>=5?8-n:0};S=blank();const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clean=o=>{o=o&&typeof o==='object'?o:{};const n=Math.min(8,Math.max(3,Array.isArray(o.pros)?o.pros.length:6)),a=k=>Array.from({length:n},(_,i)=>String((Array.isArray(o[k])?o[k][i]:'')??'').slice(0,30)),sc={};
+if(o.sc&&typeof o.sc==='object')for(const k in o.sc){const v=o.sc[k];if(/^(L\d{1,2}|Q\d{1}v\d{1}|S[12]|F)$/.test(k)&&Array.isArray(v)){const f=x=>x==null||isNaN(+x)?null:Math.max(0,Math.min(99,Math.round(+x)));sc[k]=[f(v[0]),f(v[1])]}}
+return{pros:a('pros'),oth:a('oth'),pick:a('pick'),locked:!!o.locked,sc}};
+let CODE='',OWNER='',ORG=false;const save=()=>{if(ORG&&CODE&&window.FB)FB.set(CODE,{owner:OWNER,state:JSON.stringify(S)}).catch(()=>note('Could not save - check internet'))};
 const $=h=>document.getElementById('app').innerHTML=h;
-const T=i=>S.pick[i]?`${S.pros[i]||'Pro'} & ${S.pick[i]}`:'';
+const T=i=>S.pick[i]?`${S.pros[i]||'Pro'} & ${S.pick[i]}`:'';const TH=i=>E(T(i));
 const LG=()=>{const n=S.pros.length,a=[];for(const st of[0,1])for(let i=st;i<n;i+=2)a.push([i,(i+1)%n]);return a};
 function res(id,a,b){const s=S.sc[id];if(!s||s[0]==null||s[1]==null||s[0]===s[1])return null;return s[0]>s[1]?a:b}
 function table(){const r=S.pros.map((_,i)=>({i,p:0,w:0,l:0,pf:0,pa:0}));
@@ -68,10 +72,10 @@ LG().forEach((m,k)=>{const s=S.sc['L'+k];if(!s||s[0]==null||s[1]==null||s[0]===s
 r.forEach(t=>{t.pts=t.w*2;t.d=t.pf-t.pa});
 return r.sort((a,b)=>b.pts-a.pts||b.d-a.d||b.pf-a.pf)}
 const leagueDone=()=>LG().every((m,k)=>res('L'+k,1,2));
-function setSc(id,j,v){S.sc[id]=S.sc[id]||[null,null];S.sc[id][j]=v===''?null:+v;save();show(true)}
+function setSc(id,j,v){S.sc[id]=S.sc[id]||[null,null];S.sc[id][j]=v===''||isNaN(+v)?null:Math.max(0,Math.min(99,Math.round(+v)));save();show(true)}
 function mc(id,a,b,label,st){const s=S.sc[id]||[],w=res(id,a,b);
-const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win'+(st!=='L'?' big':''):w!=null?'lose':''}"><i class="dot" style="background:${C[t%8]}"></i>${T(t)}${w===t&&st!=='L'?' 🏆':''}${w===t?'<b class="wl w">W</b>':w!=null?'<b class="wl l">L</b>':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
-return `<div class="m ${st}"><div class="mu"><span class="tag">${{L:'League',Q:'QF',S:'Semi',F:'Final'}[st]}</span>${label}</div>${row(a,0)}${row(b,1)}</div>`}
+const row=(t,j)=>`<div class="r"><div class="t ${w===t?'win'+(st!=='L'?' big':''):w!=null?'lose':''}"><i class="dot" style="background:${C[t%8]}"></i>${TH(t)}${w===t&&st!=='L'?' 🏆':''}${w===t?'<b class="wl w">W</b>':w!=null?'<b class="wl l">L</b>':''}</div><input class="sc" type="number" inputmode="numeric" min="0" value="${s[j]??''}" onchange="setSc('${id}',${j},this.value)"></div>`;
+return `<div class="m ${st}"><div class="mu"><span class="tag">${{L:'League',Q:'QF',S:'Semi',F:'Final'}[st]}</span>${label}</div>${row(a,0)}${row(b,1)}${s[0]!=null&&s[0]===s[1]?'<div class="mu" style="color:#c9453a">Scores cannot be level</div>':''}</div>`}
 function show(keep){const y=scrollY;render();if(keep)scrollTo(0,y)}
 function render(){if(!CODE)return gate();R0();if(!ORG)view()}
 function view(){document.querySelectorAll('#app input,#app select,#app button.b').forEach(e=>{if(e.classList.contains('sh'))return;e.disabled=true;if(e.tagName=='BUTTON')e.style.display='none'})}
@@ -80,7 +84,7 @@ document.getElementById('nav').innerHTML=[['teams','Teams'],['league','Matches']
 if(tab==='teams')return teams();
 if(!S.locked)return $('<div class="card box">Teams are not locked yet.</div>');
 if(tab==='league')return $('<h2 class="hs L">League stage<small>'+LG().filter((m,k)=>res('L'+k,m[0],m[1])).length+' / '+S.pros.length+' played</small></h2>'+LG().map((m,k)=>mc('L'+k,m[0],m[1],'Match '+(k+1),'L')).join('')+'<button class="b sh" onclick="shareImg(\'league\')">Share to WhatsApp</button>');
-if(tab==='table'){const t=table(),by=BYES();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>+/-</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${T(x.i)}${n<by?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td style="color:#1f9d55">${x.w}</td><td style="color:#c9453a">${x.l}</td><td>${x.d}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?'Top '+by+' skip the quarter-finals · ':''}Ties: point difference, then points scored</div><button class="b sh" onclick="shareImg('table')">Share to WhatsApp</button>`)}
+if(tab==='table'){const t=table(),by=BYES(),dn=leagueDone();return $(`<h2>Standings · win = 2 pts</h2><table><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>Diff</th><th>Pts</th></tr>${t.map((x,n)=>`<tr class="${n<by&&dn?'q':''}"><td>${n+1}</td><td class="tn"><i class="dot" style="background:${C[x.i%8]}"></i>${TH(x.i)}${n<by&&dn?'<span class="pill">BYE</span>':''}</td><td>${x.p}</td><td style="color:#1f9d55">${x.w}</td><td style="color:#c9453a">${x.l}</td><td style="font-weight:600;color:${x.d>0?'#1f9d55':x.d<0?'#c9453a':'var(--mu)'}">${x.d>0?'+'+x.d:x.d<0?'−'+(-x.d):'0'}</td><td><b>${x.pts}</b></td></tr>`).join('')}</table><div class="mu" style="margin:8px 0">${by?(dn?'Top '+by+' skip the quarter-finals':'Top '+by+' will skip the quarter-finals once the league ends'):''}<br>DIFF = points scored minus points conceded. Ties: DIFF, then points scored</div><button class="b sh" onclick="shareImg('table')">Share to WhatsApp</button>`)}
 play()}
 function PO(){const t=table().map(x=>x.i),n=t.length,sd=k=>k<=n?t[k-1]:null;let A,B,Q=[];if(n<=3)return{Q:[],S:[],F:{id:'F',a:sd(1),b:sd(2),l:'Final'}};
 if(n===4){A=[sd(1),sd(4)];B=[sd(2),sd(3)]}else{const W=[];[[1,8],[4,5],[2,7],[3,6]].forEach(([x,y])=>{const a=sd(x),b=sd(y);if(b==null)W.push(a);else{const id='Q'+x+'v'+y;Q.push({id,a,b,l:'Seed '+x+' v '+y});W.push(res(id,a,b))}});A=[W[0],W[1]];B=[W[2],W[3]]}
@@ -94,7 +98,7 @@ const G=(st,t,b,c)=>'<div class="grp '+st+'"><div class="ban"><span>'+t+'</span>
 if(p.Q.length)h+=G('Q','Quarter-finals',p.Q.map(x=>blk(x,'Q')).join(''),p.Q.length+' matches');
 if(p.S.length)h+=G('S','Semi-finals',p.S.map(x=>blk(x,'S')).join(''),'2 matches');h+=G('F','🏆 Final',blk(p.F,'F'),'1 match');
 const c=p.F.a!=null&&p.F.b!=null?res('F',p.F.a,p.F.b):null;
-if(c!=null)h+=`<div class="champ">🏆<br>Champions<br><span style="font-size:20px">${T(c)}</span></div>`;
+if(c!=null)h+=`<div class="champ">🏆<br>Champions<br><span style="font-size:20px">${TH(c)}</span></div>`;
 h+='<button class="b sh" onclick="shareImg(\'play\')">Share to WhatsApp</button>';$(h)}
 async function shareImg(mode){const t=table(),by=BYES(),dn=leagueDone(),p=dn?PO():null,play=mode==='play';if(play&&!p)return;
 const W=1080,P=56,F='"Helvetica Neue",Helvetica,Arial,sans-serif',it=[];const bar=(tx,c)=>it.push({k:'s',tx,c});
@@ -103,7 +107,7 @@ if(p.Q.length){bar('Quarter-finals','#d98a0b');p.Q.forEach(m=>it.push({k:'m',m,c
 if(p.S.length){bar('Semi-finals','#8250d8');p.S.forEach(m=>it.push({k:'m',m,c:'#8250d8',po:1}))}
 bar('Final','#111');it.push({k:'m',m:p.F,c:'#111',po:1})}
 else if(mode==='league'){bar('League matches','#2f6fdb');LG().forEach((m,k)=>it.push({k:'m',m:{id:'L'+k,a:m[0],b:m[1]},c:'#2f6fdb'}))}
-else{bar('Standings','#111');t.forEach((r,i)=>it.push({k:'t',r:r,n:i+1,b:i<by}))}
+else{bar('Standings','#111');t.forEach((r,i)=>it.push({k:'t',r:r,n:i+1,b:dn&&i<by}))}
 const hh={s:100,t:96,m:156,c:200};let H=250;it.forEach(o=>H+=hh[o.k]);H+=210;
 const cv=document.createElement('canvas');cv.width=W;cv.height=H;const q=cv.getContext('2d');
 const T2=(s,a,y,w,px,col,al,mx)=>{q.font=w+' '+px+'px '+F;q.fillStyle=col;q.textAlign=al||'left';q.fillText(s,a,y,mx)};
@@ -116,7 +120,7 @@ if(o.k==='s'){q.fillStyle=o.c;q.fillRect(P,y+30,22,22);T2(o.tx.toUpperCase(),P+4
 else if(o.k==='c'){q.fillStyle='#000';q.fillRect(P,y+10,W-2*P,170);T2('🏆  CHAMPIONS',W/2,y+70,'700',30,'#fff','center');T2(T(o.cm),W/2,y+142,'700',58,'#fff','center',W-2*P-40)}
 else if(o.k==='t'){const r=o.r;if(o.b){q.fillStyle='#efefef';q.fillRect(P,y,W-2*P,88)}
 T2(String(o.n),P+22,y+60,'700',42,'#111','center');q.fillStyle=C[r.i%8];q.beginPath();q.arc(P+92,y+44,15,0,7);q.fill();
-T2(T(r.i),P+124,y+58,'700',42,'#111','left',460);T2(r.w+'W',W-P-290,y+56,'700',34,'#1f9d55','right');T2(r.l+'L',W-P-170,y+56,'700',34,'#c9453a','right');T2(String(r.pts),W-P-16,y+60,'700',56,'#111','right')}
+T2(T(r.i),P+124,y+58,'700',42,'#111','left',420);T2(r.w+'W',W-P-410,y+56,'700',34,'#1f9d55','right');T2(r.l+'L',W-P-320,y+56,'700',34,'#c9453a','right');T2(r.d>0?'+'+r.d:r.d<0?'−'+(-r.d):'0',W-P-130,y+56,'700',34,r.d>0?'#1f9d55':r.d<0?'#c9453a':'#888','right');T2(String(r.pts),W-P-16,y+60,'700',56,'#111','right')}
 else{const m=o.m,a=m.a,b=m.b,kn=a!=null&&b!=null,w=kn?res(m.id,a,b):null,sc=S.sc[m.id]||[];
 q.globalAlpha=.07;q.fillStyle=o.c;q.fillRect(P,y+8,W-2*P,142);q.globalAlpha=1;q.fillStyle=o.c;q.fillRect(P,y+8,10,142);
 [[a,0],[b,1]].forEach(([tm,j])=>{const yb=y+62+j*64,win=w!=null&&w===tm,los=w!=null&&!win;
@@ -136,12 +140,12 @@ document.addEventListener('touchend',e=>{if(!CODE||e.touches.length)return;const
 if(sT&&/INPUT|SELECT|BUTTON/.test(sT.tagName))return;if(sx<28||sx>w-28)return;if(Date.now()-st>700)return;
 if(Math.abs(dx)<80||Math.abs(dx)<Math.abs(dy)*2)return;go(dx>0?1:-1)},{passive:true});
 function teams(){let h='';if(!ORG&&!S.locked)return $('<div class="card box">Teams not announced yet. This page updates live.</div>');
-if(S.locked){h+='<h2>Teams</h2>'+(ORG?'<div class="mu">Edit a name any time to substitute a player</div>':'')+S.pros.map((_,i)=>`<div class="m" style="--c:${C[i%8]}"><div class="mu">Team ${i+1}</div>${ORG?`<div class="r"><input value="${S.pros[i]}" onchange="S.pros[${i}]=this.value.trim();save()"><input value="${S.pick[i]}" onchange="S.pick[${i}]=this.value.trim();save()"></div>`:`<div class="t win">${T(i)}</div>`}</div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">Edit teams</button>')+(cf?'<div class="card box"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
-h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Rows are just two lists (pros / partner pool). The real pairs are made only by the picks or the draw below. Add or remove rows (3 to 8 teams, odd or even).</div><div class="card box">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" value="${p}" onchange="S.pros[${i}]=this.value.trim();save()"><input placeholder="Partner ${i+1}" value="${S.oth[i]}" onchange="S.oth[${i}]=this.value.trim();save()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
+if(S.locked){h+='<h2>Teams</h2>'+(ORG?'<div class="mu">Edit a name any time to substitute a player</div>':'')+S.pros.map((_,i)=>`<div class="m" style="--c:${C[i%8]}"><div class="mu">Team ${i+1}</div>${ORG?`<div class="r"><input maxlength="30" value="${E(S.pros[i])}" onchange="S.pros[${i}]=this.value.trim();save()"><input maxlength="30" value="${E(S.pick[i])}" onchange="S.pick[${i}]=this.value.trim();save()"></div>`:`<div class="t win">${TH(i)}</div>`}</div>`).join('')+(Object.keys(S.sc).length?'':'<button class="b g" onclick="S.locked=false;save();render()">Edit teams</button>')+(cf?'<div class="card box"><b>Erase all teams and scores?</b><br><button class="b" style="background:#d93025" onclick="S=blank();save();cf=false;msg=\'\';render()">Yes, reset</button><button class="b g" onclick="cf=false;render()">Cancel</button></div>':'<button class="b g" onclick="cf=true;render()">Reset league</button>');return $(h)}
+h+='<h2>1. Pairs ('+S.pros.length+' teams)</h2><div class="mu">Rows are just two lists (pros / partner pool). The real pairs are made only by the picks or the draw below. Add or remove rows (3 to 8 teams, odd or even).</div><div class="card box">'+S.pros.map((p,i)=>`<div class="r" style="margin:3px 0"><input placeholder="Pro ${i+1}" maxlength="30" value="${E(p)}" onchange="S.pros[${i}]=this.value.trim();save()"><input placeholder="Partner ${i+1}" maxlength="30" value="${E(S.oth[i])}" onchange="S.oth[${i}]=this.value.trim();save()"><button class="b g" style="flex:none;padding:8px 12px" onclick="delRow(${i})">✕</button></div>`).join('')+'</div><button class="b g" onclick="addRow()">+ Add pair</button>';
 h+='<h2>2. Partner picks</h2><div class="mu">Pros send their pick privately on WhatsApp – select it here, or press the lottery.</div><div class="card box">';
 S.pros.forEach((p,i)=>{const used=S.pick.filter((x,j)=>x&&j!==i);
-h+=`<div class="r" style="margin:4px 0"><div class="t">${p||'Pro '+(i+1)}</div><select onchange="S.pick[${i}]=this.value;save();render()"><option value="">– pick –</option>${S.oth.filter(o=>o&&!used.includes(o)).map(o=>`<option ${S.pick[i]===o?'selected':''}>${o}</option>`).join('')}</select></div>`});
-h+='</div><button class="b" onclick="lottery()">Lottery draw</button><button class="b" onclick="lock()">Lock teams & start</button>'+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':'');$(h)}
+h+=`<div class="r" style="margin:4px 0"><div class="t">${E(p||'Pro '+(i+1))}</div><select onchange="S.pick[${i}]=this.value;save();render()"><option value="">– pick –</option>${S.oth.filter(o=>o&&!used.includes(o)).map(o=>`<option ${S.pick[i]===o?'selected':''}>${E(o)}</option>`).join('')}</select></div>`});
+h+='</div><button class="b" onclick="lottery()">Lottery draw</button><button class="b" onclick="lock()">Lock teams & start</button>'+(msg?'<div class="card" style="color:#d93025">'+E(msg)+'</div>':'');$(h)}
 function addRow(){if(S.pros.length>=8)return note('Maximum 8 pairs');S.pros.push('');S.oth.push('');S.pick.push('');save();render()}
 function delRow(i){if(S.pros.length<=3)return note('Minimum 3 pairs');S.pros.splice(i,1);S.oth.splice(i,1);S.pick.splice(i,1);S.pick=S.pick.map(x=>S.oth.includes(x)?x:'');save();render()}
 function lottery(){const o=S.oth.filter(Boolean);if(o.length<S.pros.length||S.pros.some(p=>!p))return note('Enter all names first.');
@@ -150,18 +154,24 @@ function lock(){msg='';if(S.pros.some(p=>!p)||S.pick.some(p=>!p))return note('Fi
 function share(){open('https://wa.me/?text='+encodeURIComponent('🏸 Badminton League – live scores\nOpen: '+location.href.split('#')[0]+'\nLeague code: '+CODE))}
 render();
 function gate(){document.getElementById('nav').innerHTML='';let q={};try{q=JSON.parse(localStorage.getItem('bl_sess'))||{}}catch(e){}
-$(`<h2>Open a league</h2><div class="card box"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${q.c||''}" style="margin:3px 0"><input id="gp" type="password" placeholder="Organizer PIN (organizers only)" value="${q.p||''}" style="margin:3px 0"></div><button class="b" onclick="enter(0)">Watch live</button><button class="b g" onclick="enter(1)">Organizer login</button>`+(msg?'<div class="card" style="color:#d93025">'+msg+'</div>':''))}
+$(`<h2>Open a league</h2><div class="card box"><input id="gc" placeholder="League code (e.g. DVG2026)" value="${E(q.c||'')}" style="margin:3px 0"><input id="gp" type="password" placeholder="Organizer PIN (4+ characters)" style="margin:3px 0"></div><button class="b" onclick="enter(0)">Watch live</button><button class="b g" onclick="enter(1)">Organizer login</button>`+(msg?'<div class="card" style="color:#d93025">'+E(msg)+'</div>':''))}
 async function enter(org){const g=i=>document.getElementById(i).value.trim();const c=g('gc').toUpperCase().replace(/[^A-Z0-9]/g,''),p=g('gp');
 if(c.length<4)return note('Code needs 4+ letters/numbers');if(!window.FB)return note('Still connecting - try again in a moment');
 try{const d=await FB.get(c);
-if(org){if(p.length<4)return note('Choose a PIN of 4+ characters');if(d&&d.pin!==p)return note('Wrong PIN for this league');PIN=p;ORG=true;CODE=c;S=d?JSON.parse(d.state):blank();if(!d)save()}
-else{if(!d)return note('League not found - check the code');CODE=c;ORG=false;S=JSON.parse(d.state);FB.listen(c,x=>{if(x){S=JSON.parse(x.state);const y=scrollY;render();scrollTo(0,y)}})}
-msg='';try{localStorage.setItem('bl_sess',JSON.stringify({c,p:org?p:''}))}catch(e){}tab=ORG?'teams':'table';render()}catch(e){note('Connection problem: '+e.message)}}
+if(org){if(p.length<4)return note('Choose a PIN of 4+ characters');if(d&&!d.owner)return note('This older league has no owner. Use a new league code.');
+const u=await FB.login(c,p);if(d&&d.owner!==u.uid)return note('Wrong PIN for this league');
+OWNER=u.uid;ORG=true;CODE=c;S=d?clean(JSON.parse(d.state)):blank();if(!d)save()}
+else{if(!d)return note('League not found - check the code');CODE=c;ORG=false;S=clean(JSON.parse(d.state));FB.listen(c,x=>{try{if(x){S=clean(JSON.parse(x.state));const y=scrollY;render();scrollTo(0,y)}}catch(e){}})}
+msg='';try{localStorage.setItem('bl_sess',JSON.stringify({c}))}catch(e){}tab=ORG?'teams':'table';render()}
+catch(e){note(e.code==='auth/operation-not-allowed'?'Turn on Email/Password sign-in in Firebase (Authentication) first':(e.message||'').startsWith('Wrong PIN')?e.message:'Connection problem - please try again')}}
 </script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getFirestore,doc,getDoc,setDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-const db=getFirestore(initializeApp({apiKey:"AIzaSyAlY9WxJ8Q_pbDiJQ2XQmsLpBug3KBtyPQ",authDomain:"gg-dvg-badminton-league.firebaseapp.com",projectId:"gg-dvg-badminton-league",storageBucket:"gg-dvg-badminton-league.firebasestorage.app",messagingSenderId:"426882143669",appId:"1:426882143669:web:b8acbcafbbb47756a035fc"}));
+import{getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+const ap=initializeApp({apiKey:"AIzaSyAlY9WxJ8Q_pbDiJQ2XQmsLpBug3KBtyPQ",authDomain:"gg-dvg-badminton-league.firebaseapp.com",projectId:"gg-dvg-badminton-league",storageBucket:"gg-dvg-badminton-league.firebasestorage.app",messagingSenderId:"426882143669",appId:"1:426882143669:web:b8acbcafbbb47756a035fc"});const db=getFirestore(ap),au=getAuth(ap);
 const r=c=>doc(db,'leagues',c);
-window.FB={get:async c=>{const x=await getDoc(r(c));return x.exists()?x.data():null},set:(c,d)=>setDoc(r(c),d),listen:(c,f)=>onSnapshot(r(c),x=>f(x.exists()?x.data():null))};
+window.FB={login:async(c,pin)=>{const em=c.toLowerCase()+'@league.app',pw='bl-'+pin;
+try{const r=await signInWithEmailAndPassword(au,em,pw);return{uid:r.user.uid}}catch(e1){if(e1.code==='auth/operation-not-allowed')throw e1;
+try{const r=await createUserWithEmailAndPassword(au,em,pw);return{uid:r.user.uid}}catch(e2){if(e2.code==='auth/email-already-in-use')throw new Error('Wrong PIN for this league');throw e2}}},get:async c=>{const x=await getDoc(r(c));return x.exists()?x.data():null},set:(c,d)=>setDoc(r(c),d),listen:(c,f)=>onSnapshot(r(c),x=>f(x.exists()?x.data():null))};
 </script></body></html>
